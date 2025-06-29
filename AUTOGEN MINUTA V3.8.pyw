@@ -417,7 +417,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             footer_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 10))
             footer_frame.grid_columnconfigure((0, 3), weight=1) 
 
-            github_button = ctk.CTkButton(footer_frame, text="Suporte / Sobre", command=lambda: webbrowser.open_new_tab("https://github.com/SanctusLocalhost"))
+            github_button = ctk.CTkButton(footer_frame, text="Suporte / Sobre", command=lambda: webbrowser.open_new_tab("https://github.com/SanctusLocalHost/AutoGen_Minuta"))
             github_button.grid(row=0, column=1, padx=5)
 
             close_button = ctk.CTkButton(footer_frame, text="Fechar", command=self.changelog_window.destroy)
