@@ -5,11 +5,13 @@
 A aplicação possui uma interface moderna e intuitiva, com funcionalidades pensadas para o ambiente industrial.
 
 ### Tela Inicial
-![Image](https://github.com/user-attachments/assets/05312698-998f-468e-8ea7-541973826ced)
+![image](https://github.com/user-attachments/assets/2ebd5a4d-6d3f-43af-b42b-8e458772133b)
+
 <br/>
 
 ### Changelog Interno
-![image](https://github.com/user-attachments/assets/e4bb594d-f86e-464e-bb50-9b0636144ae7)
+![image](https://github.com/user-attachments/assets/87cb1e44-9081-48a1-be77-a7658ad1d289)
+
 
 
 ---
