@@ -506,8 +506,8 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         delete_source_files = False
         if self.dragged_files:
             delete_source_files = messagebox.askyesno(
-                "Atenção - Exclusão de Arquivos",
-                "Deseja Apagar os Arquivos de origem, que foram arrastados?\n\nUma vez feito, não pode ser desfeito."
+                "Atenção!!! - Exclusão de Arquivos",
+                "Deseja Apagar os Arquivos de Origem, que foram Arrastados?\n\nUma vez feito, não pode ser desfeito."
             )
         
         if delete_source_files:
