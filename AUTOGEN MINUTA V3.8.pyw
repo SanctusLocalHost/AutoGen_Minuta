@@ -22,7 +22,7 @@ except ImportError:
     messagebox.showerror("Erro de Dependência", "O módulo 'pywin32' não está instalado. Execute 'pip install pywin32' para instalá-lo.")
     raise
 
-# --- CONFIGURAÇÕES ---
+pip install customtkinter tkinterdnd2 python-docx pywin32
 
 DB_FILE_PATH = r"G:\Meu Drive\CONTROLLER\DATA CENTER\BANCO_DE_DADOS.txt"
 
@@ -48,11 +48,8 @@ NEON_TRON_THEME = {
 }
 
 def carregar_dicionario_externo(caminho_arquivo):
-    # --- INÍCIO DA ALTERAÇÃO ---
-    # Garante que o diretório do banco de dados exista
     db_directory = os.path.dirname(caminho_arquivo)
     os.makedirs(db_directory, exist_ok=True)
-    # --- FIM DA ALTERAÇÃO ---
 
     if not os.path.exists(caminho_arquivo):
         messagebox.showerror("Erro Crítico", f"O arquivo de banco de dados não foi encontrado no caminho:\n{caminho_arquivo}\n\nO diretório foi criado, mas o arquivo precisa ser colocado nele.")
@@ -119,10 +116,7 @@ def natural_sort_key(s):
 
 def process_files(destination, order_number, files):
     base_path = r'G:\Meu Drive\CONTROLLER\MINUTA'
-    # --- INÍCIO DA ALTERAÇÃO ---
-    # Garante que o diretório principal de minutas exista
     os.makedirs(base_path, exist_ok=True)
-    # --- FIM DA ALTERAÇÃO ---
 
     client_folder = None
     for folder_name in os.listdir(base_path):
@@ -130,12 +124,9 @@ def process_files(destination, order_number, files):
             client_folder = os.path.join(base_path, folder_name)
             break
     
-    # --- INÍCIO DA ALTERAÇÃO ---
-    # Se a pasta do cliente não for encontrada, cria uma nova
     if not client_folder:
         client_folder = os.path.join(base_path, destination)
         os.makedirs(client_folder, exist_ok=True)
-    # --- FIM DA ALTERAÇÃO ---
 
     template_path = r"G:\Meu Drive\CONTROLLER\MINUTA\MODELO_MINUTA_TRANSPORTE_AUTOMATICA.docx"
     if not os.path.exists(template_path):
@@ -263,7 +254,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         super().__init__(*args, **kwargs)
         self.TkdndVersion = TkinterDnD._require(self)
         
-        self.title("Minuta Autogen V3.8 (Final)")
+        self.title("Minuta Autogen")
         
         self.geometry("480x480")
         self.resizable(False, False)
@@ -272,7 +263,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_folder_path = r'G:\Meu Drive\CONTROLLER\MINUTA'
         self.last_generated_path = None
         self.changelog_window = None
-        self.placeholder_active = True
 
         # --- Widgets ---
         self.main_frame = ctk.CTkFrame(self)
@@ -295,11 +285,21 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.info_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
         self.info_frame.grid_columnconfigure(0, weight=1)
         
-        ctk.CTkLabel(self.info_frame, text="Atualizações (Ctrl+H) | Alterar Tema (Ctrl+M)", font=("Helvetica", 10, "italic")).grid(row=0, column=0, sticky="w")
+        # --- INÍCIO DA ALTERAÇÃO ---
+        self.info_label = ctk.CTkLabel(self.info_frame, text="Atualizações (Ctrl+H) | Alterar Tema (Ctrl+M)", font=("Helvetica", 10, "italic"))
+        self.info_label.grid(row=0, column=0) # Removido o sticky="w"
+        # --- FIM DA ALTERAÇÃO ---
 
-        self.file_listbox = Listbox(self.main_frame, selectmode="multiple", width=50, height=10,
+        self.listbox_container = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.listbox_container.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+
+        self.file_listbox = Listbox(self.listbox_container, selectmode="multiple", width=50, height=10,
                                     highlightthickness=0, borderwidth=0)
-        self.file_listbox.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+        self.file_listbox.pack(side="left", fill="both", expand=True)
+
+        self.placeholder_label = ctk.CTkLabel(self.listbox_container, text="Arraste os arquivos do Scanner para cá...",
+                                              text_color=("#808080", "#A9A9A9"))
+        self.placeholder_label.place(relx=0.5, rely=0.5, anchor="center")
         
         self.button_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.button_frame.grid(row=4, column=0, columnspan=2, pady=10)
@@ -322,7 +322,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_listbox.drop_target_register(DND_FILES)
         self.file_listbox.dnd_bind('<<Drop>>', self.drop_files)
         
-        self.set_listbox_placeholder()
         self.update_listbox_theme()
         
         self.bind("<Control-h>", self.show_changelog)
@@ -344,8 +343,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             textbox.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
             changelog_text = """
-## Versão 3.8 (Final)
+## Versão 3.8 (Atual)
 - Adicionada criação automática de diretórios para o banco de dados e para as minutas, caso não existam.
+- Centralizado o texto do placeholder na caixa de arrastar e soltar.
 
 ## Versão 3.7
 - Adicionada limpeza automática da pasta temporária 'BIPAGEM CONVERTIDA' após cada geração de minuta (bem-sucedida ou não).
@@ -353,8 +353,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 ## Versão 3.6
 - Adicionado atalho (Ctrl+M) para alternar manualmente entre os modos Light e Dark.
 - Reordenados os botões para melhor UX/UI.
-- Corrigido erro de inicialização `TclError` ao tentar colorir o placeholder da Listbox antes de ele existir.
-- Removido espaço extra no rodapé para um layout mais compacto.
 
 ## Versão 3.5
 - A lista de arquivos agora exibe apenas o nome do arquivo, não o caminho completo.
@@ -431,7 +429,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def update_listbox_theme(self):
         theme = ctk.get_appearance_mode()
         if theme == "Dark":
-            self.file_listbox.config(bg="#0A0A0A", 
+            self.file_listbox.config(bg="#000000", 
                                      fg="#E0E0E0", 
                                      selectbackground="#00D1D1", 
                                      selectforeground="#001010")
@@ -440,22 +438,9 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
                                      fg="black", 
                                      selectbackground="#3B8ED0", 
                                      selectforeground="white")
-        
-        if self.placeholder_active and self.file_listbox.size() > 0:
-            placeholder_color = "#A9A9A9" if theme == "Dark" else "#808080"
-            self.file_listbox.itemconfig(0, {'fg': placeholder_color})
-
-    def set_listbox_placeholder(self):
-        self.file_listbox.insert(0, "Arraste os arquivos do Scanner para cá...")
-        self.placeholder_active = True
-
-    def remove_listbox_placeholder(self):
-        self.file_listbox.delete(0)
-        self.placeholder_active = False
 
     def drop_files(self, event):
-        if self.placeholder_active:
-            self.remove_listbox_placeholder()
+        self.placeholder_label.place_forget()
         
         full_paths = self.tk.splitlist(event.data)
         
@@ -473,7 +458,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.update_listbox_theme()
 
     def _cleanup_converted_folder(self):
-        """Função auxiliar para apagar a pasta de arquivos convertidos."""
         script_directory = os.path.dirname(os.path.abspath(__file__))
         converted_folder = os.path.join(script_directory, "BIPAGEM CONVERTIDA")
         if os.path.exists(converted_folder):
@@ -535,8 +519,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.order_entry.delete(0, "end")
         self.file_listbox.delete(0, "end")
         
-        self.set_listbox_placeholder()
-        self.update_listbox_theme()
+        self.placeholder_label.place(relx=0.5, rely=0.5, anchor="center")
         
         self.last_generated_path = None
         
