@@ -10,7 +10,8 @@ A aplicação possui uma interface moderna e intuitiva, com funcionalidades pens
 <br/>
 
 ### Changelog Interno
-![image](https://github.com/user-attachments/assets/87cb1e44-9081-48a1-be77-a7658ad1d289)
+![image](https://github.com/user-attachments/assets/50233b9f-8577-4832-8104-8c4a66236e64)
+
 
 
 
