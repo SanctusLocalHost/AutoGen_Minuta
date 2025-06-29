@@ -22,7 +22,7 @@ except ImportError:
     messagebox.showerror("Erro de Dependência", "O módulo 'pywin32' não está instalado. Execute 'pip install pywin32' para instalá-lo.")
     raise
 
-pip install customtkinter tkinterdnd2 python-docx pywin32
+# pip install customtkinter tkinterdnd2 python-docx pywin32
 
 DB_FILE_PATH = r"G:\Meu Drive\CONTROLLER\DATA CENTER\BANCO_DE_DADOS.txt"
 
