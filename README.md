@@ -5,12 +5,14 @@ O software foi projetado para converter rapidamente dados brutos de Leitores de 
 A aplicação possui funcionalidades pensadas para o ambiente industrial.
 
 ### Tela Inicial
-![image](https://github.com/user-attachments/assets/2ebd5a4d-6d3f-43af-b42b-8e458772133b)
+![image](https://github.com/user-attachments/assets/8457b412-2568-4d84-8288-efcd56141312)
+
 
 <br/>
 
 ### Changelog Interno
-![image](https://github.com/user-attachments/assets/50233b9f-8577-4832-8104-8c4a66236e64)
+![image](https://github.com/user-attachments/assets/889b333c-308f-4276-8816-471d99657e7d)
+
 
 
 ---
