@@ -1,8 +1,8 @@
 # Minuta Autogen V3.8
 
-**Minuta Autogen** é uma ferramenta de automação focada em otimizar o fluxo de trabalho logístico industrial. O software foi projetado para converter rapidamente dados brutos de leitores de código de barras (Bipagens) em **Minutas de Transporte** profissionais em formato PDF, eliminando erros manuais e economizando tempo no processo de despacho de cargas.
+O software foi projetado para converter rapidamente dados brutos de Leitores de Código de Barras (Bipagens) em **Minutas de Transporte** profissionais em formato PDF, eliminando erros manuais e economizando tempo no processo de despacho das cargas.
 
-A aplicação possui uma interface moderna e intuitiva, com funcionalidades pensadas para o ambiente industrial.
+A aplicação possui funcionalidades pensadas para o ambiente industrial.
 
 ### Tela Inicial
 ![image](https://github.com/user-attachments/assets/2ebd5a4d-6d3f-43af-b42b-8e458772133b)
@@ -11,8 +11,6 @@ A aplicação possui uma interface moderna e intuitiva, com funcionalidades pens
 
 ### Changelog Interno
 ![image](https://github.com/user-attachments/assets/50233b9f-8577-4832-8104-8c4a66236e64)
-
-
 
 
 ---
