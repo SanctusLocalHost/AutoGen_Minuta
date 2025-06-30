@@ -258,7 +258,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         super().__init__(*args, **kwargs)
         self.TkdndVersion = TkinterDnD._require(self)
         
-        self.title("Minutarium Pro (Definitive Edition)")
+        self.title("Minutarium AutoGen Pro (Definitive Edition)")
         
         self.geometry("480x480")
         self.resizable(False, False)
@@ -454,7 +454,7 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             self.changelog_window.grid_columnconfigure(0, weight=1)
             self.changelog_window.grid_rowconfigure(1, weight=1)
 
-            title_label = ctk.CTkLabel(self.changelog_window, text="Minutarium Pro", font=ctk.CTkFont(size=20, weight="bold"))
+            title_label = ctk.CTkLabel(self.changelog_window, text="Minutarium AutoGen Pro", font=ctk.CTkFont(size=20, weight="bold"))
             title_label.grid(row=0, column=0, padx=10, pady=(10, 5))
 
             textbox = ctk.CTkTextbox(self.changelog_window, wrap="word")
