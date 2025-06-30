@@ -1,4 +1,4 @@
-# Minutarium Pro V3.8
+# Minutarium Pro V3.9
 
 O software foi projetado para converter rapidamente dados brutos de Leitores de Código de Barras (Bipagens) em **Minutas de Transporte** profissionais em formato PDF, eliminando erros manuais e economizando tempo no processo de despacho das cargas.
 
