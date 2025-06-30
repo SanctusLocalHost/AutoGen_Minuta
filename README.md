@@ -11,7 +11,8 @@ A aplicação possui funcionalidades pensadas para o ambiente industrial.
 <br/>
 
 ### Changelog Interno
-![image](https://github.com/user-attachments/assets/889b333c-308f-4276-8816-471d99657e7d)
+![image](https://github.com/user-attachments/assets/b7bd950d-aa8a-461f-8b02-8ed83c4b908f)
+
 
 
 
