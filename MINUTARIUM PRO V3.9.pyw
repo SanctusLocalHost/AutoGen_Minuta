@@ -125,8 +125,12 @@ def process_files(destination, order_number, files):
             break
     
     if not client_folder:
-        client_folder = os.path.join(base_path, destination)
-        os.makedirs(client_folder, exist_ok=True)
+        messagebox.showerror(
+            "Erro - Cliente não Encontrado",
+            f"O cliente '{destination}' não foi encontrado no diretório:\n{base_path}\n\n"
+            "Verifique se o nome está correto. Novas pastas de cliente devem ser criadas manualmente."
+        )
+        return None
 
     template_path = r"G:\Meu Drive\CONTROLLER\MINUTA\MODELO_MINUTA_TRANSPORTE_AUTOMATICA.docx"
     if not os.path.exists(template_path):
@@ -264,6 +268,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_generated_path = None
         self.changelog_window = None
 
+        # --- INÍCIO DA SEÇÃO DE AUTOCOMPLETE ---
+        self.client_list = self._load_clients()
+        self.autocomplete_listbox_visible = False
+        self.last_hovered_index = None # Para o efeito de hover
+        # --- FIM DA SEÇÃO DE AUTOCOMPLETE ---
+
         # --- Widgets ---
         self.main_frame = ctk.CTkFrame(self)
         self.main_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
@@ -277,11 +287,23 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.destination_entry = ctk.CTkEntry(self.main_frame, placeholder_text="Ex: Cliente")
         self.destination_entry.grid(row=0, column=1, padx=(0, 10), pady=(10, 5), sticky="ew")
 
+        # --- INÍCIO DA SEÇÃO DE AUTOCOMPLETE ---
+        self.autocomplete_listbox = Listbox(self.main_frame, highlightthickness=0, borderwidth=1, relief="flat", activestyle="none")
+        
+        self.destination_entry.bind("<KeyRelease>", self._update_autocomplete)
+        self.destination_entry.bind("<FocusOut>", self._hide_autocomplete)
+        self.autocomplete_listbox.bind("<<ListboxSelect>>", self._on_suggestion_select)
+        
+        # --- INÍCIO DA ALTERAÇÃO PONTUAL (HOVER) ---
+        self.autocomplete_listbox.bind("<Motion>", self._on_autocomplete_hover)
+        self.autocomplete_listbox.bind("<Leave>", self._on_autocomplete_leave)
+        # --- FIM DA ALTERAÇÃO PONTUAL (HOVER) ---
+        # --- FIM DA SEÇÃO DE AUTOCOMPLETE ---
+
         ctk.CTkLabel(self.main_frame, text="Nº Doc.Saída ou NF:").grid(row=1, column=0, padx=(10, 5), pady=5, sticky="e")
         self.order_entry = ctk.CTkEntry(self.main_frame, placeholder_text="9999 ou NF 9.999")
         self.order_entry.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="ew")
 
-        # --- INÍCIO DA ALTERAÇÃO ---
         self.listbox_container = ctk.CTkFrame(self.main_frame, fg_color=("white", "#000000"))
         self.listbox_container.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
@@ -302,7 +324,6 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
 
         self.button_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.button_frame.grid(row=4, column=0, columnspan=2, pady=10)
-        # --- FIM DA ALTERAÇÃO ---
         
         self.generate_button = ctk.CTkButton(self.button_frame, text="Gerar Minuta", command=self.generate_document)
         self.generate_button.pack(side="left", padx=5, expand=True)
@@ -329,6 +350,100 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
         self.bind("<Control-m>", self.toggle_manual_theme)
         self.bind("<Control-M>", self.toggle_manual_theme)
 
+    # --- INÍCIO DAS FUNÇÕES DE AUTOCOMPLETE ---
+    def _load_clients(self):
+        """Lê os nomes das subpastas no diretório de minutas para usar como fonte de autocomplete."""
+        try:
+            client_names = [name for name in os.listdir(self.default_folder_path) if os.path.isdir(os.path.join(self.default_folder_path, name))]
+            return sorted(client_names, key=str.lower)
+        except FileNotFoundError:
+            print(f"Aviso: Diretório de clientes não encontrado em {self.default_folder_path}. O autocomplete não funcionará.")
+            return []
+        except Exception as e:
+            print(f"Aviso: Erro ao carregar lista de clientes: {e}")
+            return []
+
+    def _update_autocomplete(self, event):
+        """Atualiza a lista de sugestões de autocomplete a cada tecla pressionada."""
+        if self.autocomplete_listbox_visible:
+            if event.keysym == "Down":
+                self.autocomplete_listbox.focus_set()
+                self.autocomplete_listbox.selection_set(0)
+                self.autocomplete_listbox.activate(0)
+                return "break"
+            if event.keysym == "Return":
+                self._on_suggestion_select(None)
+                return "break"
+
+        entry_text = self.destination_entry.get().lower()
+        self.autocomplete_listbox.delete(0, "end")
+
+        if not entry_text:
+            self._hide_autocomplete()
+            return
+
+        suggestions = [name for name in self.client_list if name.lower().startswith(entry_text)]
+
+        if suggestions:
+            for item in suggestions:
+                self.autocomplete_listbox.insert("end", item)
+            
+            listbox_height = min(len(suggestions), 6)
+            self.autocomplete_listbox.config(height=listbox_height)
+
+            x = self.destination_entry.winfo_x()
+            y = self.destination_entry.winfo_y() + self.destination_entry.winfo_height()
+            width = self.destination_entry.winfo_width()
+            
+            self.autocomplete_listbox.place(x=x, y=y, width=width)
+            self.autocomplete_listbox.lift()
+            self.autocomplete_listbox_visible = True
+        else:
+            self._hide_autocomplete()
+
+    def _on_suggestion_select(self, event):
+        """Preenche o campo de entrada quando uma sugestão é selecionada."""
+        selected_indices = self.autocomplete_listbox.curselection()
+        if not selected_indices:
+            return
+        
+        selected_value = self.autocomplete_listbox.get(selected_indices[0])
+        
+        self.destination_entry.delete(0, "end")
+        self.destination_entry.insert(0, selected_value)
+        
+        self._hide_autocomplete()
+        self.order_entry.focus_set()
+
+    def _hide_autocomplete(self, event=None):
+        """Esconde a lista de sugestões."""
+        self.after(150, self._place_forget_listbox)
+        
+    def _place_forget_listbox(self):
+        if self.last_hovered_index is not None:
+             self.autocomplete_listbox.itemconfig(self.last_hovered_index, bg=self.autocomplete_default_bg, fg=self.autocomplete_default_fg)
+             self.last_hovered_index = None
+        self.autocomplete_listbox.place_forget()
+        self.autocomplete_listbox_visible = False
+
+    # --- INÍCIO DAS FUNÇÕES DE HOVER (ADICIONADO) ---
+    def _on_autocomplete_hover(self, event):
+        """Muda a cor do item sob o cursor do mouse."""
+        index = self.autocomplete_listbox.nearest(event.y)
+        if index != self.last_hovered_index:
+            if self.last_hovered_index is not None:
+                self.autocomplete_listbox.itemconfig(self.last_hovered_index, bg=self.autocomplete_default_bg, fg=self.autocomplete_default_fg)
+            
+            self.autocomplete_listbox.itemconfig(index, bg=self.autocomplete_hover_bg, fg=self.autocomplete_hover_fg)
+            self.last_hovered_index = index
+
+    def _on_autocomplete_leave(self, event):
+        """Restaura a cor do item quando o mouse sai da listbox."""
+        if self.last_hovered_index is not None:
+            self.autocomplete_listbox.itemconfig(self.last_hovered_index, bg=self.autocomplete_default_bg, fg=self.autocomplete_default_fg)
+            self.last_hovered_index = None
+    # --- FIM DAS FUNÇÕES DE HOVER ---
+    
     def show_changelog(self, event=None):
         if self.changelog_window is None or not self.changelog_window.winfo_exists():
             self.changelog_window = ctk.CTkToplevel(self)
@@ -346,7 +461,12 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
             textbox.grid(row=1, column=0, sticky="nsew", padx=10, pady=(5, 10))
 
             changelog_text = """
-## Versão 3.8 (Atual)
+## Versão 3.9 (Atual)
+  - Implementação de Autocomplete: Adicionada uma nova e poderosa funcionalidade de preenchimento automático para o campo "Nome do Cliente".
+  - O sistema agora sugere nomes de clientes baseados nas pastas já existentes.
+  - Adicionado suporte completo para navegação via teclado (setas e Enter).
+
+## Versão 3.8
 - Adicionada criação automática de diretórios para o banco de dados e para as minutas, caso não existam.
 - Centralizado o texto do placeholder na caixa de arrastar e soltar.
 
@@ -432,15 +552,28 @@ class App(ctk.CTk, TkinterDnD.DnDWrapper):
     def update_listbox_theme(self):
         theme = ctk.get_appearance_mode()
         if theme == "Dark":
-            self.file_listbox.config(bg="#000000", 
-                                     fg="#E0E0E0", 
-                                     selectbackground="#00D1D1", 
-                                     selectforeground="#001010")
+            self.file_listbox.config(bg="#000000", fg="#E0E0E0", selectbackground="#00D1D1", selectforeground="#001010")
+            
+            # --- INÍCIO DA ALTERAÇÃO PONTUAL (CORES) ---
+            self.autocomplete_default_bg = "#0A0A0A"
+            self.autocomplete_default_fg = "#E0E0E0"
+            self.autocomplete_hover_bg = "#00D1D1"   # Cor do botão (cyan)
+            self.autocomplete_hover_fg = "#001010"   # Cor do texto do botão (preto)
+            self.autocomplete_listbox.config(bg=self.autocomplete_default_bg, fg=self.autocomplete_default_fg,
+                                             selectbackground="#00A0A0", selectforeground="#001010")
+            # --- FIM DA ALTERAÇÃO PONTUAL (CORES) ---
+                                             
         else: # Light
-            self.file_listbox.config(bg="white", 
-                                     fg="black", 
-                                     selectbackground="#3B8ED0", 
-                                     selectforeground="white")
+            self.file_listbox.config(bg="white", fg="black", selectbackground="#3B8ED0", selectforeground="white")
+
+            # --- INÍCIO DA ALTERAÇÃO PONTUAL (CORES) ---
+            self.autocomplete_default_bg = "white"
+            self.autocomplete_default_fg = "black"
+            self.autocomplete_hover_bg = "#E0E0E0"  # Um cinza claro para o hover no modo Light
+            self.autocomplete_hover_fg = "black"
+            self.autocomplete_listbox.config(bg=self.autocomplete_default_bg, fg=self.autocomplete_default_fg,
+                                             selectbackground="#3B8ED0", selectforeground="white")
+            # --- FIM DA ALTERAÇÃO PONTUAL (CORES) ---
 
     def drop_files(self, event):
         self.placeholder_label.place_forget()
